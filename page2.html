@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>Babylon.js sample code</title>
+
+        <!-- Babylon.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.6.2/dat.gui.min.js"></script>
+        <script src="https://assets.babylonjs.com/generated/Assets.js"></script>
+        <script src="https://cdn.babylonjs.com/recast.js"></script>
+        <script src="https://cdn.babylonjs.com/ammo.js"></script>
+        <script src="https://cdn.babylonjs.com/havok/HavokPhysics_umd.js"></script>
+        <script src="https://cdn.babylonjs.com/cannon.js"></script>
+        <script src="https://cdn.babylonjs.com/Oimo.js"></script>
+        <script src="https://cdn.babylonjs.com/earcut.min.js"></script>
+        <script src="https://cdn.babylonjs.com/babylon.js"></script>
+        <script src="https://cdn.babylonjs.com/materialsLibrary/babylonjs.materials.min.js"></script>
+        <script src="https://cdn.babylonjs.com/proceduralTexturesLibrary/babylonjs.proceduralTextures.min.js"></script>
+        <script src="https://cdn.babylonjs.com/postProcessesLibrary/babylonjs.postProcess.min.js"></script>
+        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.js"></script>
+        <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
+        <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+        <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+
+        <style>
+            html, body {
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            #renderCanvas {
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            
+            #canvasZone {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+<body>
+    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+
+        var startRenderLoop = function (engine, canvas) {
+            engine.runRenderLoop(function () {
+                if (sceneToRender && sceneToRender.activeCamera) {
+                    sceneToRender.render();
+                }
+            });
+        }
+
+        var engine = null;
+        var scene = null;
+        var sceneToRender = null;
+        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        var createScene = function () {
+        
+            // This creates a basic Babylon Scene object (non-mesh)
+            var scene = new BABYLON.Scene(engine);
+            var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 50, -200), scene);
+            camera.setTarget(BABYLON.Vector3.Zero());
+        
+            var light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
+            light.intensity = 0.6;
+            light.specular = BABYLON.Color3.Black();
+        
+            var light2 = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, -0.5, -1.0), scene);
+            light2.position = new BABYLON.Vector3(0, 5, 5);
+
+        
+           
+            // var sphere = BABYLON.Mesh.CreateGround("ground", 500, 500, 100, scene);
+        
+        	// // Lava Material creation
+        	// var lavaMaterial = new BABYLON.LavaMaterial("lava", scene);	
+        	// lavaMaterial.noiseTexture = new BABYLON.Texture("texture/cloud.png", scene); // Set the bump texture
+        	// lavaMaterial.diffuseTexture = new BABYLON.Texture("texture/lavatile.jpg", scene); // Set the diffuse texture
+        	// lavaMaterial.speed = 0.5;
+        	// lavaMaterial.fogColor = new BABYLON.Color3(1, 0, 0);
+            // lavaMaterial.unlit = true;
+        	
+        	// sphere.material = lavaMaterial;
+        	
+            var assetsManager = new BABYLON.AssetsManager(scene);
+	var spellDiskTask = assetsManager.addMeshTask("spellDiskTask", null, Assets.meshes.spellDisk.rootUrl, Assets.meshes.spellDisk.filename);
+	var pinkEnergyBallTask = assetsManager.addMeshTask("pinkEnergyBall", null, Assets.meshes.pinkEnergyBall.rootUrl, Assets.meshes.pinkEnergyBall.filename);
+	var greenEnergyBallTask = assetsManager.addMeshTask("greenEnergyBall", null, Assets.meshes.greenEnergyBall.rootUrl, Assets.meshes.greenEnergyBall.filename);
+	var yellowEnergyBallTask = assetsManager.addMeshTask("yellowEnergyBallTask", null, Assets.meshes.yellowEnergyBall.rootUrl, Assets.meshes.yellowEnergyBall.filename);
+	
+	spellDiskTask.onSuccess = function (task) {
+        task.loadedMeshes.forEach(function(mesh){
+            if(mesh.name == "__root__"){
+                mesh.name = "__spellDisk_root__";
+                mesh.scaling.scaleInPlace(10);
+            }
+        });
+	}
+	// pinkEnergyBallTask.onSuccess = function (task) {
+    //     task.loadedMeshes.forEach(function(mesh){ if(mesh.name == "__root__") mesh.name = "__pinkEnergyBall_root__"; });
+	// }
+	greenEnergyBallTask.onSuccess = function (task) {
+        task.loadedMeshes.forEach(function(mesh){
+            if(mesh.name == "__root__"){
+                mesh.name = "__greenEnergyBall_root__";
+                mesh.position.y = 24;
+            }
+        });
+	}
+	yellowEnergyBallTask.onSuccess = function (task) {
+        task.loadedMeshes.forEach(function(mesh){
+            if(mesh.name == "__root__"){
+                mesh.name = "__yellowEnergyBall_root__";
+                mesh.position.y = -24;
+            }
+        });
+	}
+	
+	
+
+        //     var haunt = new BABYLON.SceneLoader.ImportMesh("", "./Assests/", "ground.glb", scene,function(newMeshes,skeletons,animationGroups){
+        //     for(var j=0;j<newMeshes.length;j++){
+        //         newMeshes[0].position=new BABYLON.Vector3(0,-1.2,0);
+        //         newMeshes[j].applygravity=true;
+        //         var hauntee=newMeshes[j];
+        //         newMeshes[0].scaling=new BABYLON.Vector3(1,1,1);
+        //     }
+
+        // }); 
+
+
+
+
+
+
+            return scene;
+        
+        };
+                window.initFunction = async function() {
+                    
+                    
+                    
+                    var asyncEngineCreation = async function() {
+                        try {
+                        return createDefaultEngine();
+                        } catch(e) {
+                        console.log("the available createEngine function failed. Creating the default engine instead");
+                        return createDefaultEngine();
+                        }
+                    }
+
+                    window.engine = await asyncEngineCreation();
+        if (!engine) throw 'engine should not be null.';
+        startRenderLoop(engine, canvas);
+        window.scene = createScene();};
+        initFunction().then(() => {sceneToRender = scene                    
+        });
+
+        // Resize
+        window.addEventListener("resize", function () {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
