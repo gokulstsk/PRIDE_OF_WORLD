@@ -13,4 +13,4 @@ app.get("/", function(req, res){
     res.sendFile("page1.html");
 });
 var server = app.listen(2000);
-console.log("Server is running on http://localhost:2000/page1.html");
+console.log("Server is running on http://localhost:2000/page2.html");

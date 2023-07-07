@@ -28,8 +28,11 @@
                 overflow: hidden;
                 width: 100%;
                 height: 100%;
+                
                 margin: 0;
                 padding: 0;
+                vertical-align: center;
+                align-content: center;
             }
 
             #renderCanvas {
@@ -74,13 +77,93 @@
         
             var light2 = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, -0.5, -1.0), scene);
             light2.position = new BABYLON.Vector3(0, 5, 5);
-            const skyMaterial = new BABYLON.SkyMaterial("skyMaterial", scene);
-            skyMaterial.backFaceCulling = false;
-
+            // const skyMaterial = new BABYLON.SkyMaterial("skyMaterial", scene);
+            // skyMaterial.backFaceCulling = false;
+            // skyMaterial.diffuseTexture = new BABYLON.Texture("texture/lava.jpg",scene);
             const skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
-            skybox.material = skyMaterial;
-        
+            // skybox.material = skyMaterial;
+            
+            
+            var dome = new BABYLON.PhotoDome(
+        "testdome",
+        "texture/lavabg.jpg",
+        {
+            resolution: 1024,
+            size: 1000,
+            useDirectMapping: true
+        },
+        scene
+            );
            
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+            var text1 = new BABYLON.GUI.TextBlock();
+    text1.text = "P R I D E  O F  W O R L D ";
+    text1.color = "white";
+    var oc="red";
+    text1.fontfamily = "Georgia";
+    text1.family = "Georgia";
+
+    
+
+    // text1.textBlock.outlineColor=oc;
+        
+    // text1.background='black';
+    text1.fontSize = 50;
+    text1.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+
+    text1.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+
+    advancedTexture.addControl(text1);
+
+
+
+
+
+
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+   
+    var button = BABYLON.GUI.Button.CreateSimpleButton("but", "S t a r t   G a m e"  );
+    button.width = 0.2;
+    button.height = "40px";
+    button.color = "red";
+    button.background = "white";
+    button.cornerRadius = 20;
+    button.thickness =3;
+    button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_CENTER;
+    advancedTexture.addControl(button);
+    button.onPointerUpObservable.add(function() {
+        testfnction();
+        function testfnction(){
+            alert("Ready for Game !");
+        window.open("page2.html","_self");
+        }
+        //
+    });    
+
+    var ibtn = BABYLON.GUI.Button.CreateSimpleButton("but1", " i "  );
+    ibtn.width = 0.05;
+    ibtn.height = "40px";
+    ibtn.color = "red";
+    ibtn.background = "white";
+    ibtn.cornerRadius = 20;
+    ibtn.thickness = 5;    
+    ibtn.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;    ibtn.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    advancedTexture.addControl(ibtn);
+    ibtn.onPointerMoveObservable.add(function() {
+        testfnction1();
+        function testfnction1(){
+            alert("Ready for Game !");
+        // window.open("page2.html","_self");
+        }
+        //
+    });    
+
+
+
+
+
+
             var sphere = BABYLON.Mesh.CreateGround("ground", 500, 500, 100, scene);
         
         	// Lava Material creation
@@ -92,7 +175,15 @@
             lavaMaterial.unlit = true;
         	
         	sphere.material = lavaMaterial;
-        	
+            
+            // var phantom= new BABYLON.SceneLoader.ImportMesh("","./Assests/", "Phantom_SP.glb",scene,function(newMeshes,skeletons,animationGroups){
+            //     for(var i=0;i<newMeshes.length;i++){
+            //         newMeshes[0].position=new BABYLON.Vector3(0,20,-25);
+            //         newMeshes[0].scaling=new BABYLON.Vector3(4,4,4);
+            //     }
+            // });
+
+
         
 
             var haunt = new BABYLON.SceneLoader.ImportMesh("", "./Assests/", "ground.glb", scene,function(newMeshes,skeletons,animationGroups){
