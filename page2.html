@@ -60,14 +60,42 @@
         // connectToServer();
         // function connectToServer(){
             console.log("connecting to server.... ");
+            
             socket=io.connect("http://localhost:8000",{transport:["websocket","polling"],upgrade:false});
             socket.on("connect",function (){
                 console.log("established connection");
                 socket.on("GetyourID",function(data){
                     game.id=data.id;
+
                     // gamescene();
+                   console.log(game.id);
                     socket.emit("thankyou",{});
                 });
+                socket.on("anotherakmCreated",function(data){
+                    createakm(scene,data);
+                });
+                socket.on("AnotherTankMoved", function (data) {
+                    var akm = enemies[data.id];
+                    console.log(akm);
+                    akm.setState(data);
+                
+                });
+
+                window.onbeforeunload = function () {
+                    socket.emit("IGoAway", game.id);
+                    socket.disconnect();
+                }
+
+                socket.on("AnotherWentAway", function (data) {
+                    
+                    var akm = enemies[data.id];
+                    akm.dispose();
+                    delete enemies[data.id];
+                
+                });
+
+
+
                 socket.on("connect_error", (err) => {
                 console.log(`connect_error due to ${err.message}`);
                 });
@@ -77,6 +105,10 @@
         // }
 
 
+
+            
+            
+
         var startRenderLoop = function begin(engine, canvas) {
             engine.runRenderLoop(function () {
                 if (sceneToRender && sceneToRender.activeCamera) {
@@ -85,42 +117,41 @@
             });
         }
 
-        // function startgame(){
 
         var engine = null;
         var scene = null;
         var sceneToRender = null;
-        var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
+        var createDefaultEngine = function() { 
+            return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
         var createScene = function gamescene () {
             var scene = new BABYLON.Scene(engine);
+            // var akm= createakm(scene);
+            var menus=menubtn();
             let dT = engine.getDeltaTime();
             function updateDT() {
                 dT = engine.getDeltaTime();
             }
-        
-
-
+           
+            
+            function menubtn(){
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-   
-   var button = BABYLON.GUI.Button.CreateSimpleButton("but", "M E N U"  );
-   button.width = 0.125;
-   button.height = "30px";
-   button.color = "red";
-   button.background = "white";
-   button.cornerRadius = 20;
-   button.thickness =3;
-   button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-   button.horizontalAlignment=BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-   advancedTexture.addControl(button);
-   button.onPointerUpObservable.add(function() {
-       testfnction();
-       function testfnction(){
-        //    alert("Ready for Game !");
-       window.open("page1.html","_self");
-       }
-       //
-   });   
-
+            var button = BABYLON.GUI.Button.CreateSimpleButton("but", "M E N U"  );
+            button.width = 0.125;
+            button.height = "30px";
+            button.color = "red";
+            button.background = "white";
+            button.cornerRadius = 20;
+            button.thickness =3;
+            button.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+            button.horizontalAlignment=BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+            advancedTexture.addControl(button);
+            button.onPointerUpObservable.add(function() {
+                testfnction();
+                function testfnction(){
+                window.open("page1.html","_self");
+                }
+            });   
+        };
 
 
 
@@ -178,23 +209,7 @@
             sv.onAfterDrawObservable.add(console.log("sv drawn"));
             sv.verticalBar.onValueChangedObservable.add(console.log("vb change"));
             
-            var bgs = new BABYLON.GUI.Rectangle();
-            bgs.width=0.11;
-            bgs.thickness=2;
-            bgs.cornerRadius=30;
-            bgs.color="red";
-            bgs.background="black";
-            bgs.height=0.1;
-            bgs.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-
-            advancedTexture.addControl(bgs);
-            bgs.addControl(ammocount);
-            var ammocount = new BABYLON.GUI.TextBlock();
-            // ammocount.leftInPixels = canvas.width/21.1;
-            ammocount.text = " "+auam+" ";
-            ammocount.color = "white";
-            ammocount.fontSize = 20;
-            advancedTexture.addControl(ammocount);
+           
         
             // 
         
@@ -234,8 +249,9 @@
             function mousemoveCallback(event) {
                 var demo = requestAnimationFrame(mousemoveCallback);
             }
-        
+            
             // Lights
+            
             var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
         
             var camera = new BABYLON.FreeCamera("camera", new BABYLON.Vector3(0, 25, 0), scene);
@@ -255,13 +271,65 @@
             camera.applyGravity = true;
             camera.ellipsoid = new BABYLON.Vector3(0.25, 1.5, 0.25);
             camera._needMoveForGravity = true;
+            
         
+            createakm(scene);
+            function createakm(scene,data){
+            // console.log(powerakm);
+            var bgs = new BABYLON.GUI.Rectangle();
+            bgs.width=0.11;
+            bgs.thickness=2;
+            bgs.cornerRadius=30;
+            bgs.color="red";
+            bgs.background="black";
+            bgs.height=0.1;
+            bgs.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+
+           
+            advancedTexture.addControl(bgs);
+            bgs.addControl(ammocount);
+            var ammocount = new BABYLON.GUI.TextBlock();
+            ammocount.text = " "+auam+" ";
+            ammocount.color = "white";
+            ammocount.fontSize = 20;
+            advancedTexture.addControl(ammocount);
+
+                
+
             var akm = new BABYLON.TransformNode();
             akm.parent = camera;
             camera.fov = 1;
             akm.position = new BABYLON.Vector3(0.5, -0.7, 0.5);
             akm.rotation.x = -0.01;
-        
+            akm.setState=function(data){
+                akm.position.x=data.x;
+                akm.position.y=data.y;
+                akm.position.z=data.z;
+                akm.rotation.x=data.rx;
+                akm.rotation.y=data.ry;
+                akm.rotation.z=data.rz;
+                }
+
+            akm.state={
+                id : game.id,
+                x : akm.position.x,
+                y: akm.position.y,
+                z: akm.position.z,
+                rx: akm.rotation.x,
+                ry: akm.rotation.y,
+                rz: akm.rotation.z
+            }
+            socket.emit("IWascreated"+akm.state);
+            if(data){
+                enemies[data.id]=akm;
+                akm.setState(data);
+            }
+            else{
+                socket.emit("IWasCreated"+akm.state);
+            }
+
+
+
             BABYLON.SceneLoader.ImportMesh("", "https://dl.dropbox.com/s/kqnda4k2aqx8pro/", "AKM.obj", scene, function (newMeshes) {
                 var mat = new BABYLON.StandardMaterial("", scene);
                 mat.diffuseTexture = new BABYLON.Texture("https://dl.dropbox.com/s/isvd4dggvp3vks2/akm_diff.tga");
@@ -341,10 +409,9 @@
         lavaMaterial.speed = 0.1;
         lavaMaterial.fogColor = new BABYLON.Color3(0, 0, 0);
         lavaMaterial.unlit = true;
-        // lavaMaterial.material=new BABYLON.GridMaterial("gmat1",scene);
         
         ground0.material = lavaMaterial;
-        ground1.material=lavaMaterial;
+        // ground1.material=lavaMaterial;
         
 
             var box = new BABYLON.Mesh.CreateBox("box", 5, scene);
@@ -454,7 +521,7 @@
                         akm.position = new BABYLON.Vector3(0.2, -0.7, 0.2);
                         // camera.fov = 1.5;
                         camera.fov=0;
-                        reload.play();
+                        // reload.play();
                     }
                 };
         
@@ -481,7 +548,7 @@
                             aure = 100;
                             akm.position = new BABYLON.Vector3(0.5, -0.7, 0.5);
                             camera.fov = 1.5;
-                            reload.play();
+                            // reload.play();
                         }
                         break;
         
@@ -617,22 +684,28 @@
                 ammocount.leftInPixels = canvas.width/2.25;
         
             }
-        
-        
             scene.registerBeforeRender(function() {
                 update();
                 updateDT();
+                
                 //keypress();
             });
         
+        };
+        // console.log("powerakm");
+
+        
+           
+        
             canvas.focus();
-          
+
 
 
             return scene;
+
+    };
         // };
         
-        };
                 window.initFunction = async function() {
                     
                     
@@ -649,7 +722,10 @@
                     window.engine = await asyncEngineCreation();
         if (!engine) throw 'engine should not be null.';
         startRenderLoop(engine, canvas);
-        window.scene = createScene();};
+        window.scene = createScene();
+        // createakm(scene);
+
+    };
         initFunction().then(() => {sceneToRender = scene                    
         });
 
