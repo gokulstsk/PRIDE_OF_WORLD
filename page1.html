@@ -104,7 +104,6 @@
     text1.fontfamily = "Georgia";
     text1.family = "Georgia";
 
-    
 
     // text1.textBlock.outlineColor=oc;
         
@@ -150,15 +149,29 @@
     ibtn.thickness = 5;    
     ibtn.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;    ibtn.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
     advancedTexture.addControl(ibtn);
-    ibtn.onPointerMoveObservable.add(function() {
-        testfnction1();
-        function testfnction1(){
-            alert("Ready for Game !");
-        // window.open("page2.html","_self");
-        }
-        //
-    });    
-
+    ibtn.onPointerUpObservable.add(function() {
+        
+    //         // alert("Ready for Game !");
+           textcontent();
+    //     // window.open("page2.html","_self");
+    });  
+    
+    function textcontent(){
+    var rectangle = new BABYLON.GUI.Rectangle("rect");
+            rectangle.background = "black";
+            rectangle.color = "red";
+            rectangle.width = "400px";
+            rectangle.height = "200px";
+            advancedTexture.addControl(rectangle);
+            rectangle.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+            var text1 = new BABYLON.GUI.TextBlock("text1");
+            text1.fontFamily = "Helvetica";
+            text1.textWrapping = true;
+            text1.text = "A New kind of shooting game were the entire field is filled with lava and theme of the player is to fight for their pride. \n\nALL THE BEST. \n\n WASD for Movement\n R for reload  ";
+            text1.color = "white";
+            text1.fontSize = "14px";
+            rectangle.addControl(text1);
+    }
 
 
 
@@ -186,7 +199,7 @@
 
         
 
-            var haunt = new BABYLON.SceneLoader.ImportMesh("", "./Assests/", "ground.glb", scene,function(newMeshes,skeletons,animationGroups){
+            var haunt = new BABYLON.SceneLoader.ImportMesh("", "./Assests/","ground.glb", scene,function(newMeshes,skeletons,animationGroups){
             for(var j=0;j<newMeshes.length;j++){
                 newMeshes[0].position=new BABYLON.Vector3(0,-1.2,0);
                 newMeshes[j].applygravity=true;
@@ -195,6 +208,36 @@
             }
 
         }); 
+
+        function textinput(){
+        var input = new BABYLON.GUI.InputText();
+        input.width = 0.2;
+        input.maxWidth = 0.2;
+        input.height = "40px";
+        input.text = "Click here to start typing!";
+        input.color = "white";
+        input.background = "green";
+        input.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_LEFT   ;
+
+		advancedTexture.addControl(input);    
+
+        };
+
+        
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
             return scene;

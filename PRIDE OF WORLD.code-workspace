@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.port": 5501,
+		"workbench.editorAssociations": {
+			"*.obj": "babylonjs.assetDigest"
+		}
+	}
+}

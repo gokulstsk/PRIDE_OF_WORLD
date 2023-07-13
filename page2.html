@@ -22,6 +22,7 @@
         <script src="https://cdn.babylonjs.com/serializers/babylonjs.serializers.min.js"></script>
         <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
         <script src="https://cdn.babylonjs.com/inspector/babylon.inspector.bundle.js"></script>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.0/socket.io.dev.js"></script> -->
         <script src="js/socket.js"></script>
 
         <style>
@@ -47,24 +48,33 @@
     </head>
 <body>
     <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <!-- <div id"menu"><canvas id="menupoint"></canvas></div> -->
     <script>
+        ///<reference path="js/socket.js"/>
+        
         var canvas = document.getElementById("renderCanvas");
+        // document.addEventListener("DOMContentLoaded", connectToServer);
         var socket;
         var game={};
-        function connectToServer(){
-            socket=io.connect("http://localhost:3000",{transport:['websocket']});
-            socket.on("connect",function(){
+        var enemies={};
+        // connectToServer();
+        // function connectToServer(){
+            console.log("connecting to server.... ");
+            socket=io.connect("http://localhost:8000",{transport:["websocket","polling"],upgrade:false});
+            socket.on("connect",function (){
                 console.log("established connection");
                 socket.on("GetyourID",function(data){
-                    game.id=data.id;                
-                    startRenderLoop();
+                    game.id=data.id;
+                    // gamescene();
                     socket.emit("thankyou",{});
                 });
-                // begin();
+                socket.on("connect_error", (err) => {
+                console.log(`connect_error due to ${err.message}`);
+                });
+
+                
             });
-        }
-
-
+        // }
 
 
         var startRenderLoop = function begin(engine, canvas) {
@@ -75,12 +85,13 @@
             });
         }
 
-       
+        // function startgame(){
+
         var engine = null;
         var scene = null;
         var sceneToRender = null;
         var createDefaultEngine = function() { return new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false}); };
-        var createScene = function () {
+        var createScene = function gamescene () {
             var scene = new BABYLON.Scene(engine);
             let dT = engine.getDeltaTime();
             function updateDT() {
@@ -92,9 +103,8 @@
             var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
    
    var button = BABYLON.GUI.Button.CreateSimpleButton("but", "M E N U"  );
-   button.width = 0.15;
+   button.width = 0.125;
    button.height = "30px";
-
    button.color = "red";
    button.background = "white";
    button.cornerRadius = 20;
@@ -110,19 +120,6 @@
        }
        //
    });   
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -180,12 +177,23 @@
             // sv.onReadyObservable.add(console.log("sv ORO"));
             sv.onAfterDrawObservable.add(console.log("sv drawn"));
             sv.verticalBar.onValueChangedObservable.add(console.log("vb change"));
-        
+            
+            var bgs = new BABYLON.GUI.Rectangle();
+            bgs.width=0.11;
+            bgs.thickness=2;
+            bgs.cornerRadius=30;
+            bgs.color="red";
+            bgs.background="black";
+            bgs.height=0.1;
+            bgs.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+
+            advancedTexture.addControl(bgs);
+            bgs.addControl(ammocount);
             var ammocount = new BABYLON.GUI.TextBlock();
-            ammocount.leftInPixels = canvas.width/21.1;
-            ammocount.text = auam+"";
+            // ammocount.leftInPixels = canvas.width/21.1;
+            ammocount.text = " "+auam+" ";
             ammocount.color = "white";
-            ammocount.fontSize = 24;
+            ammocount.fontSize = 20;
             advancedTexture.addControl(ammocount);
         
             // 
@@ -333,6 +341,7 @@
         lavaMaterial.speed = 0.1;
         lavaMaterial.fogColor = new BABYLON.Color3(0, 0, 0);
         lavaMaterial.unlit = true;
+        // lavaMaterial.material=new BABYLON.GridMaterial("gmat1",scene);
         
         ground0.material = lavaMaterial;
         ground1.material=lavaMaterial;
@@ -361,6 +370,14 @@
             box5.position.y = 0.5;
             box5.position.z = 5;
             box5.checkCollisions = true;
+            var box6 = new BABYLON.Mesh.CreateBox("box6",5,scene);
+            box6.position.y = 1.0;
+            box6.position.z =6;
+            box6.checkCollisions = true;
+            var box7 = new BABYLON.Mesh.CreateBox("box7",5,scene);
+            box7.position.y =1.5;
+            box7.position.z =7;
+            box7.checkCollisions = true;
         
             var health = 0.001;
             var target = BABYLON.Mesh.CreateBox("target", 5, scene);
@@ -434,8 +451,9 @@
                 if ((map["r"] || map ["R"])) {
                     if (care == true && aure == 0) {
                         aure = 100;
-                        akm.position = new BABYLON.Vector3(0.5, -0.7, 0.5);
-                        camera.fov = 1.5;
+                        akm.position = new BABYLON.Vector3(0.2, -0.7, 0.2);
+                        // camera.fov = 1.5;
+                        camera.fov=0;
                         reload.play();
                     }
                 };
@@ -503,7 +521,7 @@
             right = 2;
             var aufi = false;
             var auti = 0;
-            var auam = 1/0;
+            var auam = 30; //infinite ammo at default
             var aure = 0;
             var aim = false;
             var res = 0;
@@ -548,8 +566,7 @@
                 }
             }
         
-            var shoot = new BABYLON.Sound("gunshot", "sounds/gunshot.wav", scene);
-            var reload = new BABYLON.Sound("reload", "https://raw.githubusercontent.com/Giv0/PhaserGameAssets/master/babylonjs/reload.mp3", scene);
+            
         
             var si = 0;
             var sf = 0;
@@ -581,7 +598,7 @@
                     PEW();
                     camera.rotation.x -= kickback;
                     var fire = scene.beginAnimation(akm, res, ree, false);
-                    shoot.play();
+                    
                     auti = 100;
                     auam--;
                 }
@@ -594,10 +611,10 @@
                 }
         
                 if (aure != 0) aure--;
-                if (aure == 1) auam = 60;
-        
-                ammocount.text = auam+"";
-                ammocount.leftInPixels = canvas.width/2.1;
+                if (aure == 1) auam = 30;
+                // ammocount.background="black";
+                ammocount.text ="︻デ═—  "+auam+" ";
+                ammocount.leftInPixels = canvas.width/2.25;
         
             }
         
@@ -609,9 +626,11 @@
             });
         
             canvas.focus();
-        
+          
+
 
             return scene;
+        // };
         
         };
                 window.initFunction = async function() {
